@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hydrology Triggering Signal Page</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background-color: #1f2933;
+      color: #cfd2d6;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: #0f172a;
+      padding: 10px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80px;
+    }
+
+    .title {
+      font-family: 'Anton', sans-serif;
+      color: #7b9ce3;
+      font-size: 48px;
+    }
+
+    .clock {
+      text-align: right;
+    }
+
+    .clock time {
+      display: block;
+      font-size: 32px;
+      color: #7b9ce3;
+      font-weight: bold;
+    }
+
+    .clock span {
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 30px 50px;
+      gap: 10px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .circle-btn {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      border: 10px solid #1f2933;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      text-align: center;
+      font-size: 24px;
+      letter-spacing: 1px;
+      padding: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .circle-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .pre-warning {
+      background-color: yellow;
+      color: #1f2933;
+      border: 6px solid black;
+    }
+
+    .red-alert {
+      background-color: #a01919;
+      color: #fff;
+      border: 6px solid black;
+    }
+
+    .all-clear {
+      background-color: #167e14;
+      color: #fff;
+      border: 6px solid black;
+    }
+
+    .disaster-warning {
+      background-color: #ae7b24;
+      color: #fff;
+      border: 6px solid black;
+    }
+
+    .timer-box {
+      background-color: #111827;
+      padding: 60px 70px;
+      text-align: center;
+      border-radius: 10px;
+      min-width: 400px;
+    }
+
+    .timer-box h2 {
+      font-size: 48px;
+      margin-bottom: 15px;
+      letter-spacing: 2px;
+    }
+
+    .timer-box p {
+      font-size: 120px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .timer-box span {
+      font-size: 36px;
+    }
+
+    .reset-section {
+      background-color: #ccc;
+      padding: 20px;
+      border-radius: 20px;
+      position: relative;
+      width: 550px;  /* Increased width */
+      height: 550px; /* Increased height */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .reset-btn {
+      width: 350px;  /* Increased width */
+      height: 350px; /* Increased height */
+      border-radius: 50%;
+      background-color: #d61e34;
+      position: relative;
+      border: 8px solid #999;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .reset-ring {
+      position: absolute;
+      width: 400px;  /* Increased ring size */
+      height: 400px; /* Increased ring size */
+      background-color: #ffc233;
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    .reset-label {
+      position: absolute;
+      top: -85px; /* Adjusted label position to avoid overlap */
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+      letter-spacing: 5px;
+      color: black;
+      font-size: 28px; /* Adjusted font size */
+    }
+
+    footer {
+      background-color: #0f172a;
+      text-align: center;
+      padding: 24px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">HYDROLOGY</div>
+    <div class="clock">
+      <time id="clockTime"></time>
+      <span id="clockDate"></span>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="buttons">
+      <div class="circle-btn pre-warning">PRE WARNING</div>
+      <div class="circle-btn red-alert">RED ALERT</div>
+      <div class="circle-btn all-clear">ALL CLEAR</div>
+      <div class="circle-btn disaster-warning">DISASTER WARNING</div>
+    </div>
+
+    <div class="timer-box">
+      <h2>TIMER</h2>
+      <p id="timer">180</p>
+      <span>sec</span>
+    </div>
+
+    <div class="reset-section">
+      <div class="reset-ring"></div>
+      <div class="reset-btn" onclick="resetTimer()">
+        <div class="reset-label">RESET</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Run 36 sec, Pause 24 sec, Cycle 3 times, then stop after 3 min.
+  </footer>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const date = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('clockTime').textContent = time;
+      document.getElementById('clockDate').textContent = date;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    let timerValue = 180;
+    let timerInterval;
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (timerValue > 0) {
+          timerValue--;
+          document.getElementById('timer').textContent = timerValue;
+        } else {
+          clearInterval(timerInterval);
+        }
+      }, 1000);
+    }
+
+    function resetTimer() {
+      timerValue = 180;
+      document.getElementById('timer').textContent = timerValue;
+      clearInterval(timerInterval);
+    }
+
+    startTimer();
+  </script>
+</body>
+</html>
